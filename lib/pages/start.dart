@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:day35/models/service.dart';
 import 'package:day35/pages/select_service.dart';
 import 'package:flutter/material.dart';
 
 class StartPage extends StatefulWidget {
-  const StartPage({ Key? key }) : super(key: key);
+  const StartPage({Key? key}) : super(key: key);
 
   @override
   _StartPageState createState() => _StartPageState();
@@ -27,26 +26,33 @@ class _StartPageState extends State<StartPage> {
   ];
 
   int selectedService = 4;
+  bool isPageLoaded = false;  // Flag to ensure page is loaded only once
 
   @override
   void initState() {
-    // Randomly select from service list every 2 seconds
-    Timer.periodic(Duration(seconds: 2), (timer) { 
-      setState(() {
-        selectedService = Random().nextInt(services.length);
-      });
-    });
-
     super.initState();
+    // Start a timer only if the page has not been loaded yet.
+    if (!isPageLoaded) {
+      Timer.periodic(Duration(seconds: 2), (timer) {
+        if (!isPageLoaded) {
+          setState(() {
+            selectedService = Random().nextInt(services.length);
+          });
+        } else {
+          timer.cancel();  // Stop the timer if the page is already loaded
+        }
+      });
+    }
+    isPageLoaded = true;  // Set flag to true after the first load
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: Column(
         children: [
-          SizedBox(height: 100,),
+          SizedBox(height: 100),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 50),
             height: MediaQuery.of(context).size.height * 0.45,
@@ -63,8 +69,9 @@ class _StartPageState extends State<StartPage> {
               itemBuilder: (BuildContext context, int index) {
                 return FadeInUp(
                   delay: Duration(milliseconds: index * 100),
-                  child: serviceContainer(services[index].imageURL, services[index].name, index));
-              }
+                  child: serviceContainer(services[index].imageURL, services[index].name, index),
+                );
+              },
             ),
           ),
           Expanded(
@@ -74,81 +81,86 @@ class _StartPageState extends State<StartPage> {
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(80),
                   topRight: Radius.circular(80),
-                )
+                ),
               ),
               child: Column(
                 children: [
-                  SizedBox(height: 50,),
-                  FadeInUp(child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 40),
-                    child: Center(
-                      child: Text(
-                        'Easy, reliable way to take \ncare of your home',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade900,
-                        ),
-                      ),
-                    ),
-                  )),
-                  SizedBox(height: 20,),
-                  FadeInUp(child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 60),
-                    child: Center(
-                      child: Text(
-                        'We provide you with the best people to help take care of your home.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ),
-                  )),
-                  FadeInUp(child: Padding(
-                    padding: EdgeInsets.all(50.0),
-                    child: MaterialButton(
-                      elevation: 0,
-                      color: Colors.black,
-                      onPressed: () {
-                         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SelectService(),
-                          ),
-                        );
-                      },
-                      height: 55,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)
-                      ),
+                  SizedBox(height: 50),
+                  FadeInUp(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
                       child: Center(
                         child: Text(
-                          'Get Started',
+                          'Easy, reliable way to take \ncare of your home',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade900,
                           ),
                         ),
                       ),
                     ),
-                  )),
+                  ),
+                  SizedBox(height: 20),
+                  FadeInUp(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 60),
+                      child: Center(
+                        child: Text(
+                          'We provide you with the best people to help take care of your home.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  FadeInUp(
+                    child: Padding(
+                      padding: EdgeInsets.all(50.0),
+                      child: MaterialButton(
+                        elevation: 0,
+                        color: Colors.black,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SelectService(),
+                            ),
+                          );
+                        },
+                        height: 55,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Get Started',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          )
+          ),
         ],
-      )
+      ),
     );
   }
 
   serviceContainer(String image, String name, int index) {
     return GestureDetector(
-      onTap: () {
-      },
+      onTap: () {},
       child: AnimatedContainer(
         duration: Duration(milliseconds: 500),
         padding: EdgeInsets.all(8.0),
@@ -164,9 +176,9 @@ class _StartPageState extends State<StartPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Image.network(image, height: 30),
-            SizedBox(height: 10,),
-            Text(name, style: TextStyle(fontSize: 14),)
-          ]
+            SizedBox(height: 10),
+            Text(name, style: TextStyle(fontSize: 14)),
+          ],
         ),
       ),
     );

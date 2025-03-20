@@ -1,41 +1,69 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:day35/models/service.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:day35/pages/userdetails.dart';
+import 'package:day35/pages/SignupLogin.dart'; // Import the login screen
 
 class HomePage extends StatefulWidget {
-  const HomePage({ Key? key }) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Service> services = [
-    Service('Cleaning', 'https://img.icons8.com/external-vitaliy-gorbachev-flat-vitaly-gorbachev/2x/external-cleaning-labour-day-vitaliy-gorbachev-flat-vitaly-gorbachev.png'),
-    Service('Plumber', 'https://img.icons8.com/external-vitaliy-gorbachev-flat-vitaly-gorbachev/2x/external-plumber-labour-day-vitaliy-gorbachev-flat-vitaly-gorbachev.png'),
-    Service('Electrician', 'https://img.icons8.com/external-wanicon-flat-wanicon/2x/external-multimeter-car-service-wanicon-flat-wanicon.png'),
-    Service('Painter', 'https://img.icons8.com/external-itim2101-flat-itim2101/2x/external-painter-male-occupation-avatar-itim2101-flat-itim2101.png'),
-    Service('Carpenter', 'https://img.icons8.com/fluency/2x/drill.png'),
-    Service('Gardener', 'https://img.icons8.com/external-itim2101-flat-itim2101/2x/external-gardener-male-occupation-avatar-itim2101-flat-itim2101.png'),
-  ];
+  String username = "Loading...";
+  String email = "Loading...";
 
-  List<dynamic> workers = [
-    ['Alfredo Schafer', 'Plumber', 'https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&s=c3a31eeb7efb4d533647e3cad1de9257', 4.8],
-    ['Michelle Baldwin', 'Cleaner', 'https://uifaces.co/our-content/donated/oLkb60i_.jpg', 4.6],
-    ['Brenon Kalu', 'Driver', 'https://uifaces.co/our-content/donated/VUMBKh1U.jpg', 4.4]
-  ];
-  
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot<Map<String, dynamic>> userDoc =
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+      if (userDoc.exists && userDoc.data() != null) {
+        setState(() {
+          username = userDoc.data()?['username'] ?? 'Unknown';
+          email = userDoc.data()?['email'] ?? 'No Email';
+        });
+      }
+    }
+  }
+
+  void logoutUser() async {
+    await FirebaseAuth.instance.signOut();
+
+    // Use a fade transition when navigating to login screen
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return FadeInUp(child: LoginSignupScreen());
+        },
+        transitionDuration: Duration(milliseconds: 800),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text('Dashboard', style: TextStyle(color: Colors.black),),
+        title: Text('Dashboard', style: TextStyle(color: Colors.black)),
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () {}, 
-            icon: Icon(Icons.notifications_none, color: Colors.grey.shade700, size: 30,),
+            onPressed: () {},
+            icon: Icon(Icons.notifications_none, color: Colors.grey.shade700, size: 30),
           )
         ],
         leading: GestureDetector(
@@ -45,212 +73,221 @@ class _HomePageState extends State<HomePage> {
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('https://uifaces.co/our-content/donated/NY9hnAbp.jpg'),
+              backgroundImage: NetworkImage(
+                  'https://uifaces.co/our-content/donated/NY9hnAbp.jpg'),
             ),
-          )
+          ),
         ),
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeInUp(child: Padding(
-              padding: EdgeInsets.only(left: 20.0, top: 10.0, right: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Recent', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
-                  TextButton(
-                    onPressed: () {}, 
-                    child: Text('View all',)
-                  )
-                ],
-              ),
-            )),
-            FadeInUp(child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
+            // User Information Card
+            FadeInUp(
               child: Container(
-                padding: EdgeInsets.all(20.0),
-                height: 180,
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.0),
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade100, Colors.blue.shade300],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.shade200,
-                      offset: Offset(0, 4),
-                      blurRadius: 10.0,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(15.0),
-                          child: Image.network('https://images.pexels.com/photos/355164/pexels-photo-355164.jpeg?crop=faces&fit=crop&h=200&w=200&auto=compress&cs=tinysrgb', width: 70,)
-                        ),
-                        SizedBox(width: 15,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Isabel Kirkland", style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
-                            SizedBox(height: 5,),
-                            Text("Cleaner", style: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 18),),
-                          ],
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 20,),
-                    Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(15.0)
-                      ),
-                      child: Center(child: Text('View Profile', style: TextStyle(color: Colors.white, fontSize: 18),)),
+                      color: Colors.grey.withOpacity(0.3),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                      offset: Offset(2, 4),
                     )
                   ],
                 ),
-              ),
-            )),
-            SizedBox(height: 20,),
-            FadeInUp(child: Padding(
-              padding: EdgeInsets.only(left: 20.0, right: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
-                  TextButton(
-                    onPressed: () {}, 
-                    child: Text('View all',)
-                  )
-                ],
-              ),
-            )),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              height: 300,
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 10.0,
-                  mainAxisSpacing: 10.0,
-                ),
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: services.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return FadeInUp(
-                    delay: Duration(milliseconds: 500 * index),
-                    child: serviceContainer(services[index].imageURL, services[index].name, index));
-                }
-              ),
-            ),
-            SizedBox(height: 20,),
-            FadeInUp(child: Padding(
-              padding: EdgeInsets.only(left: 20.0, right: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Top Rated', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
-                  TextButton(
-                    onPressed: () {}, 
-                    child: Text('View all',)
-                  )
-                ],
-              ),
-            )),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              height: 120,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: workers.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return FadeInUp(
-                    delay: Duration(milliseconds: 500 * index),
-                    child: workerContainer(workers[index][0], workers[index][1], workers[index][2], workers[index][3]));
-                }
-              ),
-            ),
-            SizedBox(height: 150,),
-          ]
-        )
-      )
-    );
-  }
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      username,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                    SizedBox(height: 15),
 
-  serviceContainer(String image, String name, int index) {
-    return GestureDetector(
-      child: Container(
-        margin: EdgeInsets.only(right: 20),
-        padding: EdgeInsets.all(10.0),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          border: Border.all(
-            color: Colors.blue.withOpacity(0),
-            width: 2.0,
-          ),
-          borderRadius: BorderRadius.circular(20.0),
+                    // View Profile & Logout Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // View Profile Button
+                        BounceInLeft(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.blueAccent,
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ProfileScreen()),
+                              );
+                            },
+                            icon: Icon(Icons.person, size: 20),
+                            label: Text("View Profile"),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+
+                        // Logout Button
+                        BounceInRight(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              foregroundColor: Colors.white,
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Logout"),
+                                  content: Text("Are you sure you want to logout?"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("Cancel"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        Future.delayed(Duration(milliseconds: 500), logoutUser);
+                                      },
+                                      child: Text("Logout", style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.exit_to_app, size: 20),
+                            label: Text("Logout"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Categories Section
+            FadeInUp(
+              child: Padding(
+                padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                child: Text(
+                  'Categories',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                categoryCard("Smart Shopping", Icons.shopping_cart),
+                categoryCard("Meal Planning", Icons.restaurant_menu),
+                categoryCard("Budgeting", Icons.account_balance_wallet),
+                categoryCard("Energy Use", Icons.electric_bolt),
+              ],
+            ),
+          ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image.network(image, height: 45),
-            SizedBox(height: 20,),
-            Text(name, style: TextStyle(fontSize: 15),)
-          ]
+      ),
+
+      // Floating Action Button (FAB) for Chatbot
+      floatingActionButton: BounceInUp(
+        child: FloatingActionButton(
+          backgroundColor: Colors.blueAccent,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChatScreen()), // Updated!
+            );
+          },
+          child: Icon(Icons.chat, size: 32, color: Colors.white),
         ),
       ),
     );
   }
 
-  workerContainer(String name, String job, String image, double rating) {
-    return GestureDetector(
-      child: AspectRatio(
-        aspectRatio: 3.5,
-        child: Container(
-          margin: EdgeInsets.only(right: 20),
-          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Colors.grey.shade200,
-              width: 2.0,
-            ),
-            borderRadius: BorderRadius.circular(20.0),
+  // Category Card Widget
+  Widget categoryCard(String title, IconData icon) {
+    return FadeInUp(
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade200, Colors.blue.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15.0),
-                child: Image.network(image)
-              ),
-              SizedBox(width: 20,),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                  SizedBox(height: 5,),
-                  Text(job, style: TextStyle(fontSize: 15),)
-                ],
-              ),
-              Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(rating.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                  SizedBox(height: 5,),
-                  Icon(Icons.star, color: Colors.orange, size: 20,)
-                ],
-              )
-            ]
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 6,
+              spreadRadius: 2,
+              offset: Offset(2, 4),
+            )
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.white),
+            SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Chatbot Placeholder with Animation
+class ChatScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Chatbot')),
+      body: Center(
+        child: FadeInDown(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.smart_toy, size: 100, color: Colors.blueAccent),
+              SizedBox(height: 20),
+              Text('Chatbot feature coming soon!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
           ),
         ),
       ),

@@ -47,6 +47,7 @@ android {
         applicationId "com.example.day35"
         minSdkVersion 23
         targetSdkVersion 30
+        multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -71,6 +72,8 @@ dependencies {
 
     // Firebase Authentication for user login/signup
     implementation("com.google.firebase:firebase-auth")
+
+    implementation 'androidx.multidex:multidex:2.0.1' // ✅ ADD THIS
 
     // Firestore Database for storing user data and appliance selections
     implementation("com.google.firebase:firebase-firestore")

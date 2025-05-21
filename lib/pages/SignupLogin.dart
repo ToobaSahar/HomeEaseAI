@@ -184,21 +184,25 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> with SingleTicker
   bool _isPasswordVisible = false; // Define this variable in your State class
 
   Widget _buildTextField(
-      TextEditingController controller, String label, IconData icon,
-      {bool isPassword = false, String? errorText}) {
+      TextEditingController controller,
+      String label,
+      IconData icon, {
+        bool isPassword = false,
+        String? errorText,
+      }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword ? !_isPasswordVisible : false,  // Toggle visibility
-      style: const TextStyle(color: Colors.white),
+      obscureText: isPassword ? !_isPasswordVisible : false,
+      style: const TextStyle(color: Colors.black87), // Make input text visible
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white),
-        prefixIcon: Icon(icon, color: Colors.white),
+        labelStyle: const TextStyle(color: Colors.black54),
+        prefixIcon: Icon(icon, color: Colors.black54), // Icon visible on white
         suffixIcon: isPassword
             ? IconButton(
           icon: Icon(
             _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-            color: Colors.white,
+            color: Colors.black54,
           ),
           onPressed: () {
             setState(() {
@@ -209,15 +213,28 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> with SingleTicker
             : null,
         errorText: errorText,
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        fillColor: Colors.white.withOpacity(0.9),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.blueAccent),
+        ),
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isWide = size.width > 600;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -231,80 +248,134 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> with SingleTicker
             },
           ),
           Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isWide ? size.width * 0.05 : 20,
+                vertical: 20,
+              ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    'assets/logo.png',
-                    height: 160, // Enlarged Logo
+                  const SizedBox(height: 60),
+                  Text(
+                    'HomeEaseAI',
+                    style: TextStyle(
+                      fontSize: isWide ? 34 : 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 25),
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                  Container(
+                    width: size.width * 0.95,
+                    height: size.height,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
                     ),
-                    color: Colors.white.withOpacity(0.1),
-                    elevation: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (!isLogin) ...[
-                            _buildTextField(usernameController, 'Username', Icons.person,
-                                errorText: usernameError.isNotEmpty ? usernameError : null),
-                            const SizedBox(height: 15),
-                          ],
-                          _buildTextField(emailController, 'Email', Icons.email,
-                              errorText: emailError.isNotEmpty ? emailError : null),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 30,
+                      horizontal: isWide ? 40 : 25,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          isLogin ? 'Login' : 'Sign Up',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: isWide ? 28 : 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        if (!isLogin) ...[
+                          _buildTextField(
+                            usernameController,
+                            'Username',
+                            Icons.person,
+                            errorText: usernameError.isNotEmpty ? usernameError : null,
+                          ),
                           const SizedBox(height: 15),
-                          _buildTextField(passwordController, 'Password', Icons.lock,
-                              isPassword: true, errorText: passwordError.isNotEmpty ? passwordError : null),
-                          const SizedBox(height: 10),
-                          // Stay Signed In Checkbox
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: staySignedIn,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    staySignedIn = value ?? false;
-                                  });
-                                },
-                                activeColor: Colors.blueAccent,
-                              ),
-                              const Text("Stay Signed In", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: handleAuth,
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(isLogin ? "Login" : "Sign Up"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                isLogin = !isLogin;
-                              });
-                            },
-                            child: Text(
-                              isLogin
-                                  ? "Don't have an account? Sign up"
-                                  : "Already have an account? Login",
-                              style: TextStyle(color: Colors.blueAccent),
-                            ),
-                          ),
                         ],
-                      ),
+                        _buildTextField(
+                          emailController,
+                          'Email',
+                          Icons.email,
+                          errorText: emailError.isNotEmpty ? emailError : null,
+                        ),
+                        const SizedBox(height: 15),
+                        _buildTextField(
+                          passwordController,
+                          'Password',
+                          Icons.lock,
+                          isPassword: true,
+                          errorText: passwordError.isNotEmpty ? passwordError : null,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: staySignedIn,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      staySignedIn = value ?? false;
+                                    });
+                                  },
+                                  activeColor: Colors.blueAccent,
+                                ),
+                                const Text("Remember me", style: TextStyle(color: Colors.black87)),
+                              ],
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                // TODO: Add forget password functionality
+                              },
+                              child: const Text(
+                                "Forget Password?",
+                                style: TextStyle(color: Colors.blueAccent),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: handleAuth,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(isLogin ? "Log In" : "Sign Up"),
+                        ),
+                        const SizedBox(height: 10),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              isLogin = !isLogin;
+                            });
+                          },
+                          child: Text(
+                            isLogin
+                                ? "Don't have an account? Sign Up"
+                                : "Already have an account? Log In",
+                            style: const TextStyle(color: Colors.blueAccent),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -315,7 +386,13 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> with SingleTicker
       ),
     );
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
 }
+
 class BackgroundPainter extends CustomPainter {
   final double waveValue;
 
@@ -328,7 +405,7 @@ class BackgroundPainter extends CustomPainter {
         colors: [
           Colors.blueGrey.shade900,
           Colors.blueGrey.shade700,
-          Colors.blueGrey.shade500
+          Colors.blueGrey.shade500,
         ],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,

@@ -18,6 +18,24 @@ allprojects {
         google()
         jcenter()
     }
+
+    subprojects {
+        beforeEvaluate { project ->
+            if (project.name == 'ar_flutter_plugin') {
+                project.buildscript.dependencies.classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+            }
+        }
+        afterEvaluate { project ->
+            if (project.hasProperty('android')) {
+                project.android {
+                    if (namespace == null) {
+                        namespace project.group
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 rootProject.buildDir = '../build'

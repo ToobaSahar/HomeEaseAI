@@ -3,30 +3,74 @@ import '../pages/Chat_screen.dart';
 import '../pages/home.dart';
 import '../pages/userdetails.dart';
 
-class CustomBottomNav extends StatelessWidget {
+class CustomBottomNav extends StatefulWidget {
   final int currentIndex;
-  final VoidCallback? onChatPressed; // <-- Add optional chat popup callback
-
+  final VoidCallback? onChatPressed;
+  final VoidCallback? onLogoutPressed;
   const CustomBottomNav({
     super.key,
     required this.currentIndex,
     this.onChatPressed,
+    this.onLogoutPressed,
   });
 
-  void _onTabTapped(BuildContext context, int index) {
-    if (index == currentIndex) return;
 
+  @override
+  State<CustomBottomNav> createState() => _CustomBottomNavState();
+}
+
+class _CustomBottomNavState extends State<CustomBottomNav> {
+  late int selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.currentIndex;
+  }
+
+  IconData _getOutlinedIcon(int index) {
     switch (index) {
       case 0:
+        return Icons.home_outlined;
+      case 1:
+        return Icons.chat_outlined;
+      case 2:
+        return Icons.person_outline;
+      default:
+        return Icons.circle_outlined;
+    }
+  }
+
+  void _onTabTapped(BuildContext context, int index) {
+    if (index == selectedIndex) return;
+
+    setState(() {
+      selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0: // Home
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const HomePage()),
         );
         break;
-      case 1:
-        if (onChatPressed != null) {
-          onChatPressed!(); // <-- Show popup if callback is provided
+
+      case 1: // Chat
+        if (widget.onChatPressed != null) {
+          widget.onChatPressed!(); // open chat popup
         }
+        break;
+
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProfileScreen(
+             // 👈 Pass it forward
+            ),
+          ),
+        );
         break;
     }
   }
@@ -36,66 +80,77 @@ class CustomBottomNav extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final List<IconData> icons = [
-      Icons.home,
-      Icons.chat,
-    ];
+    final List<IconData> icons = [Icons.home, Icons.chat, Icons.person];
+    final List<String> labels = ['HOME', 'CHAT', 'PROFILE'];
 
-    final List<String> labels = ['HOME', 'CHAT'];
-
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.012),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, -2),
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(2, (index) {
-          bool isSelected = currentIndex == index;
-          return GestureDetector(
-            onTap: () => _onTabTapped(context, index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? screenWidth * 0.04 : 0,
-                vertical: screenHeight * 0.01,
-              ),
-              decoration: isSelected
-                  ? BoxDecoration(
-                color: const Color(0xFF4F83E9),
-                borderRadius: BorderRadius.circular(20),
-              )
-                  : null,
-              child: Row(
-                children: [
-                  Icon(
-                    icons[index],
-                    color: isSelected ? Colors.white : Colors.black,
-                    size: screenWidth * 0.06,
-                  ),
-                  if (isSelected) SizedBox(width: screenWidth * 0.015),
-                  if (isSelected)
-                    Text(
-                      labels[index],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenWidth * 0.035,
-                      ),
-                    ),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 0.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              spreadRadius: 2,
+              offset: Offset(0, -1), // Only top shadow
             ),
-          );
-        }),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: screenHeight * 0.012),
+            color: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(3, (index) {
+                bool isSelected = selectedIndex == index;
+
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => _onTabTapped(context, index),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isSelected ? icons[index] : _getOutlinedIcon(index),
+                          color: isSelected
+                              ? const Color.fromRGBO(37, 138, 212, 1)
+                              : Colors.grey.shade500,
+                          size: screenWidth * 0.065,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          labels[index],
+                          style: TextStyle(
+                            fontFamily: 'FunnelDisplay',
+                            fontWeight: FontWeight.w600,
+                            fontSize: screenWidth * 0.03,
+                            color: isSelected
+                                ? const Color.fromRGBO(37, 138, 212, 1)
+                                : Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
       ),
     );
+
+
+
   }
+
 }

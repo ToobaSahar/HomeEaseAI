@@ -15,12 +15,32 @@ import 'package:day35/pages/preferences.dart';
 import 'package:day35/pages/home.dart' as home; // Avoids name conflict
 import 'package:day35/pages/ApplianceSelection.dart';
 import 'package:day35/pages/Chat_screen.dart';
+import 'package:day35/pages/energy_bill_analyzer_screen.dart';
 
 // Newly added imports
 import 'package:day35/pages/HomeDecor.dart';
 import 'package:day35/pages/MealPlanning.dart';
 import 'package:day35/pages/budget_screen.dart';
 import 'package:day35/pages/EnergyUsage.dart';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<void> setupFirebaseMessaging() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Request permissions on iOS
+  await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // Get the device token and save it to Firestore if needed
+  String? token = await messaging.getToken();
+  print("📲 FCM Token: $token");
+
+  // OPTIONAL: Save this token to Firestore under the user's doc
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +54,10 @@ void main() async {
   /*await initializeNotifications();
   await  fetchAndSchedulePeakHour();
 */
+
+  // 👇 Add this to request permission and get the FCM token
+  await setupFirebaseMessaging();
+
   runApp(HomeEaseAIApp());
 }
 
@@ -69,15 +93,20 @@ class HomeEaseAIApp extends StatelessWidget {
                     PreferenceTagScreen(selectedAppliances: []));
           case '/home':
             return MaterialPageRoute(builder: (_) => home.HomePage());
-          case '/smartShopping':
-            return MaterialPageRoute(builder: (_) => SmartShoppingPage());
+
           case '/energyUsage':
             return MaterialPageRoute(builder: (_) => EnergyCalculatorScreen());
+
+          case '/energyBillAnalyzer':
+            return MaterialPageRoute(builder: (_) => EnergyBillAnalyzerScreen());
 
           case '/mealPlanning':
             return MaterialPageRoute(builder: (_) => RecipePromptScreen());
           case '/budgeting':
             return MaterialPageRoute(builder: (_) => BudgetScreen());
+
+          case '/homeDecor':
+            return MaterialPageRoute(builder: (_) => HomeDecor());
 
           default:
             return MaterialPageRoute(

@@ -179,7 +179,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> with SingleTicker
     }
   }
 
-
   /// *Reusable TextField Widget*
   bool _isPasswordVisible = false; // Define this variable in your State class
 

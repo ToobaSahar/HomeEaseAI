@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +7,9 @@ import 'package:day35/pages/userdetails.dart';
 import 'package:day35/pages/SignupLogin.dart'; // Import the login screen
 import 'package:day35/pages/Chat_screen.dart';
 import 'package:day35/widgets/Bottom_nav_bar.dart'; // adjust the path as needed
+import 'package:day35/services/fcm_service.dart';
+
+import '../widgets/AnimatedText.dart'; // Update with your actual app name
 
 class HomePage extends StatefulWidget {
 
@@ -24,6 +28,20 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     fetchUserData();
+
+    // 🔔 Listen for foreground notifications
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        print("🔔 Foreground message received: ${message.notification!.title}");
+        // Optional: You could show a snackbar/dialog here
+      }
+    });
+
+    // 🔁 Listen for taps on notifications when app is in background
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('📨 Notification clicked!');
+      // Optional: Handle navigation or alert here
+    });
   }
 
   @override
@@ -43,6 +61,9 @@ class _HomePageState extends State<HomePage> {
           username = userDoc.data()?['username'] ?? 'Unknown';
           email = userDoc.data()?['email'] ?? 'No Email';
         });
+
+        // 🔔 Initialize FCM after fetching user info
+        await initFCM(user.uid);
       }
     }
   }
@@ -71,14 +92,24 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Blue Top Section (User Info Card)
             FadeInUp(
               child: Container(
-                padding: EdgeInsets.fromLTRB(16, topPadding + 16, 16, 16),
-                width: double.infinity,
-                decoration: BoxDecoration(
+                height: 250, // 🔼 Increased height of top bar
+                // 🔼 Increased height of top bar
+          alignment: Alignment.center,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.92, // 👈 85% of screen width
+            height: 250,
+            decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/freepik_assistant_1751829836437.png'),
+                    fit: BoxFit.cover, // 📌 Makes sure image fills the container
+                  ),
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade100, Colors.blue.shade300],
+                    colors: [
+                      Colors.blue.shade100.withOpacity(0.8),
+                      Colors.blue.shade300.withOpacity(0.8)
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -95,135 +126,55 @@ class _HomePageState extends State<HomePage> {
                     )
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Profile picture (previously in AppBar)
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/login');
-                        },
-                        child: CircleAvatar(
-                          radius: 25,
-                          backgroundImage: NetworkImage(
-                              'https://uifaces.co/our-content/donated/NY9hnAbp.jpg'),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, topPadding + 30, 16, 20),
+                  child: AnimatedTextSwitcher(
+                    fixedHeight: 80,
+                    texts: [
+                      Text(
+                        'Welcome to\nHomeEaseAI',
+                        style: TextStyle(
+                          fontFamily: 'FunnelDisplay',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          color: Colors.white.withOpacity(0.95),
+                          height: 1.5,
                         ),
                       ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      username,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: TextStyle(fontSize: 14, color: Colors.white70),
-                    ),
-                    SizedBox(height: 15),
-
-                    // Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        BounceInLeft(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.blueAccent,
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => ProfileScreen()),
-                              );
-                            },
-                            icon: Icon(Icons.person, size: 20),
-                            label: Text("View Profile"),
-                          ),
+                      Text(
+                        'Your AI assistant for\nhome chores,\nplanning & comfort',
+                        style: TextStyle(
+                          fontFamily: 'FunnelDisplay',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 22,
+                          color: Colors.white.withOpacity(0.9),
+                          height: 1.4,
                         ),
-                        SizedBox(width: 15),
-                        BounceInRight(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
-                              foregroundColor: Colors.white,
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text("Logout"),
-                                  content: Text("Are you sure you want to logout?"),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text("Cancel"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        Future.delayed(Duration(milliseconds: 500), logoutUser);
-                                      },
-                                      child: Text("Logout", style: TextStyle(color: Colors.red)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            icon: Icon(Icons.exit_to_app, size: 20),
-                            label: Text("Logout"),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-
-            // Categories Title
-            FadeInUp(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Categories',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
+          )
               ),
             ),
-            SizedBox(height: 10),
 
-            // Category Grid
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: GridView.count(
+              child:GridView.count(
                 shrinkWrap: true,
                 crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
                 physics: NeverScrollableScrollPhysics(),
+                childAspectRatio: 0.9, // 👈 Adjust this value to increase card height
                 children: [
-                  categoryCard("Home Decor", Icons.shopping_cart, '/smartShopping'),
+                  categoryCard("Home Decor", Icons.home_filled, '/homeDecor'),
                   categoryCard("Meal Planning", Icons.restaurant_menu, '/mealPlanning'),
                   categoryCard("Budgeting", Icons.account_balance_wallet, '/budgeting'),
-                  categoryCard("Energy Use", Icons.electric_bolt, '/energyUsage'),
+                  categoryCard("Energy Use", Icons.electric_bolt, '/energyBillAnalyzer'),
                 ],
               ),
+
             ),
           ],
         ),
@@ -242,45 +193,67 @@ class _HomePageState extends State<HomePage> {
             },
           );
         },
+        onLogoutPressed: logoutUser,
       ),
     );
   }
 
-
-  // Category Card Widget
   Widget categoryCard(String title, IconData icon, String route) {
     return FadeInUp(
       child: GestureDetector(
         onTap: () {
-          Navigator.pushNamed(context, route);  // Navigate to the page using the route
+          Navigator.pushNamed(context, route);
         },
         child: Container(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue.shade200, Colors.blue.shade400],
+              colors: [Colors.grey.shade200, Colors.grey.shade300],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                blurRadius: 6,
-                spreadRadius: 2,
-                offset: Offset(2, 4),
-              )
-            ],
+
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: Colors.white),
-              SizedBox(height: 8),
+              if (title == "Meal Planning")
+                Image.asset(
+                  'assets/images/Recipe book-pana.png',
+                  height: 140,
+                  fit: BoxFit.contain,
+                )
+              else if (title == "Home Decor")
+                Image.asset(
+                  'assets/images/8422359_3838823.png',
+                  height: 140,
+                  fit: BoxFit.contain,
+                )
+              else if (title == "Budgeting")
+                  Image.asset(
+                    'assets/images/10780299_19197027.png',
+                    height: 140,
+                    fit: BoxFit.contain,
+                  )
+                else if (title == "Energy Use")
+                    Image.asset(
+                      'assets/images/18953916_6052389.png',
+                      height: 140,
+                      fit: BoxFit.contain,
+                    )
+                  else
+                    Icon(icon, size: 40, color: Colors.black87),
+
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 16, // 🔹 Increased font size
+                  fontWeight: FontWeight.w600, // 🔹 Font weight 500
+                  fontFamily: 'FunnelDisplay', // 🔹 Font family
+                  color: Color.fromRGBO(37, 138, 212, 1), // 🔹 Text color
+                ),
               ),
             ],
           ),
@@ -288,6 +261,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
 
 }
 
@@ -409,7 +383,13 @@ class _ChatTabPopupState extends State<ChatTabPopup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: 1,
+        onChatPressed: () {
+          // Do nothing or reopen the same screen (optional)
+        },
+      ),
+
       body: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,

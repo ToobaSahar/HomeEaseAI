@@ -1,0 +1,117 @@
+name: day35
+description: A new Flutter project.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.1"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: ^1.1.8
+  equatable: ^2.0.5
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  open_file: ^3.3.2  # For opening the exported PDF
+  permission_handler:  ^11.0.0 # For requesting storage permission
+  pdf: ^3.10.7
+  together_ai_sdk: ^2.0.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  cupertino_icons: ^1.0.8
+  animate_do: ^3.3.4
+  scrollable_positioned_list: ^0.3.8
+  path_provider: ^2.1.1
+  firebase_auth: ^5.5.0
+  firebase_core: ^3.12.0
+  cloud_firestore: ^5.6.4
+  firebase_storage: ^12.0.0
+  crypto: ^3.0.3
+  uuid: ^4.5.1
+  shared_preferences: ^2.5.2
+  expandable: ^5.0.1
+  http: ^1.1.0
+  fl_chart: ^0.66.0
+  firebase_messaging: ^15.2.5
+  google_generative_ai: ^0.2.0
+  image_picker: ^0.8.7+3
+  timezone: ^0.9.2
+  intl: ^0.18.1
+  mime: ^1.0.4
+  vector_math: ^2.1.4
+  augmented_reality_plugin: ^4.0.1
+  fluttertoast: ^8.2.2
+  dropdown_button2: ^2.3.9
+  lottie: ^2.7.0
+
+dependency_overrides:
+  geolocator_android: 4.6.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The androidPackage and pluginClass identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/animations/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+
+    - family: FunnelDisplay
+      fonts:
+        - asset: assets/fonts/FunnelDisplay-Regular-BF66c6b06d462a5.otf
+          weight: 400
+        - asset: assets/fonts/FunnelDisplay-Medium-BF66c6b06d54084.otf
+          weight: 500
+        - asset: assets/fonts/FunnelDisplay-Bold-BF66c6b06d1b158.otf
+          weight: 600
+        - asset: assets/fonts/FunnelDisplay-Bold-BF66c6b06d1b158.otf
+          weight: 700
+
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
